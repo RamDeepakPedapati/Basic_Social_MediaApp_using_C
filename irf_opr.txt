@@ -1,0 +1,152 @@
+#include"Header.h"
+void put_metadata(FILE* fp,Metadata meta);
+Metadata get_metadata(FILE* fp);
+int find_offset(FILE*fp, char* name);
+int find_offset_by_id(FILE* fp, int user_id)
+{
+	int user_offset, end_user;
+	Metadata meta = get_metadata(fp);
+	int offset = USERS_PAGES_START_OFFSET;
+	User_info user;
+	fread(&user, sizeof(user), 1, fp);
+	end_user = ftell(fp);
+	while (user.user_id != user_id && end_user != meta.new_user_position);
+	{
+		fread(&user, sizeof(user), 1, fp);
+		end_user = ftell(fp);
+	}
+	//validation
+	user_offset = ftell(fp) - PAGE_SIZE;
+	return user_offset;
+}
+void new_post(FILE* fp, char*name)
+{
+	int choice;
+	printf("[1].Upload a File\n[2].Post a Feed\n[0].Back\n");
+	scanf("%d", &choice);
+	Post post;
+	post.type = choice;
+	if (choice == 1)
+	{
+		char* file_path = (char*)malloc(sizeof(char) * 64);
+		printf("Enter file path: ");
+		fflush(stdin);
+		gets(file_path);
+		/*char *file_name = (char*)malloc(sizeof(char) * 32);
+		char *extension = (char*)malloc(sizeof(char) * 8);
+		sscanf(file_path, "%s[^.]%s", file_name, extension);*/
+		FILE* fptr = fopen(file_path, "rb+");
+		fseek(fptr, 0L, SEEK_END);
+		int file_size = ftell(fptr);
+		char *file_data = (char*)malloc(sizeof(char)*file_size+1);
+		file_data[file_size] = '\0';
+		fread(file_data, file_size, 1, fptr);
+		strcpy(post.post_blob, file_data);
+		strcpy(post.file_name, file_path);
+		fclose(fptr);
+	}
+	else if (choice == 2)
+	{
+		printf("Enter Feed: ");
+		fflush(stdin);
+		gets(post.post_blob);
+	}
+	else if (choice == 0)
+	{
+		return;//call 
+	}
+	Metadata meta = get_metadata(fp);
+	User_info user;
+	int user_offset = find_offset(fp,name);
+	fseek(fp, user_offset, SEEK_SET);
+	fread(&user, sizeof(user), 1, fp);
+	strcpy(post.user_name, name);
+	post.user_id = user.user_id;
+	post.post_id = ++user.posts_count;
+	fseek(fp, meta.new_post_position, SEEK_SET);
+	fwrite(&post, sizeof(post), 1, fp);
+	user.posts_info[post.post_id-1].offset = meta.new_post_position;
+	user.posts_info[post.post_id-1].comments_count = user.posts_info[post.post_id-1].likes_count = 0;
+	meta.new_post_position = ftell(fp);
+	put_metadata(fp, meta);
+	fwrite(&user, sizeof(user), 1, fp);
+	fflush(fp);
+}
+
+void like(FILE* fp, char* posted_by, int post_id)
+{
+	post_id--;
+	int user_offset = find_offset(fp, posted_by);	
+	User_info user;
+	fseek(fp, user_offset, SEEK_SET);
+	fread(&user, sizeof(user), 1, fp);
+	user.posts_info[post_id].likes_count++;
+	fseek(fp, user_offset, SEEK_SET);
+	fwrite(&user, sizeof(user), 1, fp);
+	fflush(fp);
+}
+
+Message** get_all_messages(FILE* fp, char *name)
+{
+	int user_offset = find_offset(fp, name);
+	User_info user;
+	fseek(fp, user_offset, SEEK_SET);
+	fread(&user, sizeof(user), 1, fp);
+	Message**msg = (Message**)malloc(sizeof(Message*)*user.message_count);
+	for (int iter = 0;iter< user.message_count; iter++)
+	{
+		msg[iter] = (Message*)malloc(sizeof(Message*)*100);
+		msg[iter] = (&user.messages[iter]);
+	}
+	return msg;
+}
+
+void save_post(FILE* fp, int posted_user_id, int post_id)
+{
+
+	int user_offset = find_offset_by_id(fp, posted_user_id);
+	fseek(fp, user_offset, SEEK_SET);
+	User_info user;
+	fread(&user, sizeof(user), 1, fp);
+	int post_offset = user.posts_info[post_id].offset;
+	
+
+
+
+}
+
+void send_message(FILE* fp, char* sender_name, char* reciever_name, char* message)
+{
+	int temp_id;
+	int sender_offset = find_offset(fp, sender_name);
+	int reciever_offset = find_offset(fp, reciever_name);
+	User_info send_user,recv_user;
+	fseek(fp, sender_offset, SEEK_SET);
+	fread(&send_user, sizeof(send_user), 1, fp);
+	strcpy(send_user.messages[send_user.message_count].message, message);
+	send_user.messages[send_user.message_count].from_user_id = send_user.user_id;
+	fseek(fp, reciever_offset, SEEK_SET);
+	fread(&recv_user, sizeof(recv_user), 1, fp);
+	strcpy(recv_user.messages[recv_user.message_count].message, message);
+	recv_user.messages[recv_user.message_count].from_user_id = send_user.user_id;
+	send_user.messages[send_user.message_count++].to_user_id = recv_user.user_id;
+	recv_user.messages[recv_user.message_count++].to_user_id = recv_user.user_id;
+	fseek(fp, sender_offset, SEEK_SET);
+	fwrite(&send_user, sizeof(send_user), 1, fp);
+	fseek(fp, reciever_offset, SEEK_SET);
+	fwrite(&recv_user, sizeof(recv_user), 1, fp);
+	fflush(fp);
+}
+void add_comment(FILE* fp, char* posted_by, int post_id,char *comment)
+{
+	post_id--;
+	int user_offset = find_offset(fp,posted_by);
+	fseek(fp, user_offset, SEEK_SET);
+	User_info user;
+	fread(&user, sizeof(user), 1,fp);
+	strcpy(user.posts_info[post_id].comments[user.posts_info[post_id].comments_count], comment);
+	fseek(fp, user_offset, SEEK_SET);
+	user.posts_info[post_id].comments_count++;
+	fwrite(&user, sizeof(user), 1, fp);
+	fflush(fp);
+}

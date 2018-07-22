@@ -1,0 +1,19 @@
+﻿Build started 6/5/2018 12:49:55 AM.
+     1>Project "D:\MissionRnD summer\SummerSystemTask\SummerSystemTask\SummerSystemTask.vcxproj" on node 2 (Build target(s)).
+     1>ClCompile:
+         C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\CL.exe /c /ZI /nologo /W3 /WX- /sdl /Od /Oy- /D _MBCS /Gm /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Fo"Debug\\" /Fd"Debug\vc120.pdb" /Gd /TP /analyze- /errorReport:prompt mainFunc.cpp
+         mainFunc.cpp
+     1>d:\missionrnd summer\summersystemtask\summersystemtask\structures.h(50): warning C4091: 'typedef ' : ignored on left of 'user_info' when no variable is declared
+     1>d:\missionrnd summer\summersystemtask\summersystemtask\user_operations.h(86): warning C4101: 'id' : unreferenced local variable
+     1>d:\missionrnd summer\summersystemtask\summersystemtask\user_operations.h(86): warning C4101: 'users_count' : unreferenced local variable
+     1>d:\missionrnd summer\summersystemtask\summersystemtask\user_operations.h(86): warning C4101: 'new_user_offset' : unreferenced local variable
+     1>d:\missionrnd summer\summersystemtask\summersystemtask\user_operations.h(219): warning C4101: 'size' : unreferenced local variable
+     1>d:\missionrnd summer\summersystemtask\summersystemtask\user_operations.h(314): warning C4101: 'newtext' : unreferenced local variable
+       Link:
+         C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\link.exe /ERRORREPORT:PROMPT /OUT:"D:\MissionRnD summer\SummerSystemTask\Debug\SummerSystemTask.exe" /INCREMENTAL /NOLOGO kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /DEBUG /PDB:"D:\MissionRnD summer\SummerSystemTask\Debug\SummerSystemTask.pdb" /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"D:\MissionRnD summer\SummerSystemTask\Debug\SummerSystemTask.lib" /MACHINE:X86 Debug\mainFunc.obj
+         SummerSystemTask.vcxproj -> D:\MissionRnD summer\SummerSystemTask\Debug\SummerSystemTask.exe
+     1>Done Building Project "D:\MissionRnD summer\SummerSystemTask\SummerSystemTask\SummerSystemTask.vcxproj" (Build target(s)).
+
+Build succeeded.
+
+Time Elapsed 00:00:00.37
